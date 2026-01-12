@@ -163,6 +163,8 @@
 
                 // Set poll title
                 document.getElementById('pollTitle').textContent = poll.name;
+                // Update page title for better link previews
+                document.title = poll.name;
 
                 // Populate users sidebar
                 const usersUl = document.querySelector('#users-sidebar ul');
@@ -352,19 +354,12 @@
                         }
                         // Check votes
                         const dateStr = date.toISOString().split('T')[0];
-                        const dayVotes = votes.filter(v => v.voted_date === dateStr);
-                        const yesCount = dayVotes.filter(v => v.vote_type === 'YES').length;
-                        const maybeCount = dayVotes.filter(v => v.vote_type === 'MAYBE').length;
-                        let voteText = '';
-                        if (yesCount > 0) voteText += yesCount;
-                        if (maybeCount > 0) {
-                            if (voteText) voteText += ' + ';
-                            voteText += maybeCount + '?';
-                        }
-                        if (voteText) {
+                        const voteCount = votes.filter(v => v.voted_date === dateStr).length;
+                        
+                        if (voteCount) {
                             const voteSpan = document.createElement('span');
                             voteSpan.className = 'vote-count';
-                            voteSpan.textContent = voteText;
+                            voteSpan.textContent = voteCount + '';
                             td.appendChild(voteSpan);
                         }
                         td.onclick = () => selectDay(dayNum);
