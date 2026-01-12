@@ -1,0 +1,236 @@
+# Goodle - Poll Application Specification
+
+## Current Implementation
+
+### Frontend Structure
+
+The application has been restructured into two main pages:
+
+#### index.html (Home Page)
+- Displays a list of the user's polls
+- Shows a plus button (+) for creating new polls
+- Each poll in the list shows the poll name and has a delete button
+- Clicking on a poll name redirects to poll.html with the specific poll ID
+- Clicking the plus button opens a JavaScript prompt asking for the poll name, then creates the poll and redirects to poll.html
+
+#### poll.html (Poll Viewing/Editing Page)
+- Displays a specific poll based on the ID in the URL parameter
+- Shows a calendar with voting functionality
+- Includes a nickname input field for setting/updating the user's nickname
+- Features a users sidebar showing all participants in the poll
+- Has a home button in the header that redirects back to index.html
+- Users can vote YES, MAYBE, or NO for specific dates
+- The calendar shows vote counts for each day
+- Users sidebar can be closed by clicking outside of it
+
+### Routes
+
+- `/` or `/index.html`: Home page showing user's polls list
+- `/poll.html?id={pollid}`: Poll viewing/editing page for specific poll
+
+### Key Features
+
+1. **Poll Creation**: Uses JavaScript prompt instead of custom popup
+2. **Navigation**: Home button replaces the polls list button
+3. **Error Handling**: Redirects to index.html when poll is not found
+4. **User Experience**: Sidebar closes when clicking outside
+5. **Consistent Styling**: All CSS consolidated in styles.css
+
+## Database Schema
+
+### Tables
+
+#### USERS
+- Stores user IDs
+- `user_id`: Unique identifier for each user
+
+#### polls
+- Stores poll information
+- `poll_id`: Unique identifier for each poll
+- `creating_user`: ID of user who created the poll
+- `create_date`: Date and time when poll was created
+- `name`: Name of the poll
+
+#### poll_participants
+- Stores participant information for each poll
+- `poll_id`: Poll identifier
+- `user_id`: User identifier
+- `user_color`: Color assigned to the user in this poll
+- `nickname`: User's nickname in this poll
+
+#### votes
+- Stores voting information
+- `vote_id`: Unique vote identifier
+- `poll_id`: Poll identifier
+- `voted_date`: Date the vote is about
+- `user_id`: User who cast the vote
+- `vote_type`: Type of vote (YES or MAYBE)
+
+## Setup Instructions
+
+### Prerequisites
+- Web server (Apache, Nginx, etc.)
+- PHP 7.4 or higher
+- MySQL 5.7 or higher
+- Browser with JavaScript enabled
+
+### Installation
+
+1. **Clone or download the project** to your web server directory:
+   ```bash
+   git clone https://github.com/your-repo/goodle.git
+   cd goodle
+   ```
+
+2. **Set up the database**:
+   - Create a MySQL database
+   - Import the database schema from `backend/setup.php` or run the setup script
+   - Update database credentials in `backend/config.php`
+
+3. **Configure the web server**:
+   - Point your web server to the project directory
+   - Ensure PHP is properly configured
+   - Make sure the web server has write permissions for necessary directories
+
+4. **Set up the database connection**:
+   - Edit `backend/config.php` with your database credentials:
+   ```php
+   <?php
+   $host = 'localhost';
+   $dbname = 'goodle';
+   $username = 'your_username';
+   $password = 'your_password';
+   ```
+
+5. **Initialize the database**:
+   - Run the setup script by accessing `backend/setup.php` in your browser or via command line
+   - This will create all necessary tables
+
+6. **Access the application**:
+   - Open your browser and navigate to the project URL
+   - The application should automatically redirect to index.html showing your polls list
+
+### Running the Application
+
+1. **First time setup**:
+   - When you first access the application, a user ID will be generated and stored in localStorage
+   - This user ID is used to identify you across sessions
+
+2. **Creating a poll**:
+   - Click the plus button (+) on the home page
+   - Enter a name for your poll in the prompt
+   - You will be redirected to the new poll page
+
+3. **Voting in a poll**:
+   - Click on any date in the calendar
+   - Choose YES, MAYBE, or NO to cast your vote
+   - Your vote will be saved automatically
+
+4. **Managing participants**:
+   - Click the users button in the header to see all participants
+   - As the poll creator, you can remove other participants
+
+## API Endpoints
+
+All API endpoints are located in the `backend/api/` directory:
+
+- `create_poll.php`: Create a new poll
+- `get_poll.php`: Get poll information and votes
+- `get_user_polls.php`: Get list of polls created by the user
+- `delete_poll.php`: Delete a poll
+- `vote.php`: Cast or update a vote
+- `update_nickname.php`: Update user's nickname in a poll
+- `remove_user.php`: Remove a user from a poll
+
+## Technical Stack
+
+- **Frontend**: HTML5, JavaScript (ES6+), CSS3
+- **Backend**: PHP 7.4+
+- **Database**: MySQL 5.7+
+- **Storage**: localStorage for user ID persistence
+
+## Browser Compatibility
+
+The application is designed to work with modern browsers:
+- Chrome 80+
+- Firefox 75+
+- Safari 13+
+- Edge 80+
+
+## Development
+
+### File Structure
+
+```
+/
+├── index.html              # Home page with polls list
+├── poll.html              # Poll viewing/editing page
+├── styles.css             # Consolidated CSS styles
+├── main.js                # Shared JavaScript functions
+├── spec.md                # This specification file
+└── backend/
+    ├── config.php         # Database configuration
+    ├── setup.php          # Database setup script
+    └── api/               # API endpoints
+        ├── create_poll.php
+        ├── get_poll.php
+        ├── get_user_polls.php
+        ├── delete_poll.php
+        ├── vote.php
+        ├── update_nickname.php
+        └── remove_user.php
+```
+
+### Building
+
+No build process is required. Simply place the files on a web server with PHP support.
+
+### Testing
+
+The application can be tested by:
+1. Creating multiple polls
+2. Voting on different dates
+3. Testing the navigation between pages
+4. Verifying the sidebar functionality
+5. Testing the poll creation and deletion
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Database connection failed**:
+   - Check credentials in `backend/config.php`
+   - Ensure MySQL server is running
+   - Verify database exists
+
+2. **API endpoints not working**:
+   - Check web server error logs
+   - Ensure PHP is properly installed and configured
+   - Verify file permissions
+
+3. **JavaScript errors**:
+   - Check browser console for errors
+   - Ensure all files are properly loaded
+   - Verify no syntax errors in JavaScript code
+
+### Debugging
+
+- Enable PHP error reporting by adding to `backend/config.php`:
+  ```php
+  error_reporting(E_ALL);
+  ini_set('display_errors', 1);
+  ```
+
+- Use browser developer tools to debug JavaScript issues
+- Check network tab for API request/response details
+
+## Future Enhancements
+
+Potential improvements that could be made:
+- Add user authentication
+- Implement poll sharing with specific users
+- Add date ranges for polls
+- Implement poll templates
+- Add export functionality for poll results
+- Mobile app version
+- Push notifications for poll updates
