@@ -1,0 +1,43 @@
+specifikace goodle
+
+
+Frontend:
+- route '/':
+    - vycentrovany input pro nazev ankety
+    - pod nim tlacitko Vytvorit anketu
+
+- route '/poll/?id={pollid}'
+    - stranka zobrazujici anketu s ID podle URL
+    - velky kalendar zobrazujici jeden mesic, vychozi mesic je prvni takovy, ve kterem se objevuji nejake hlasy. Pokud zadne hlasy v teto ankete neexistuji, zobrazi se aktualni mesic. Zobrazovany mesic lze zmenit pomoci sipek vlevo a vpravo v zahlavi kalendare, kde je take zobrazen nazev aktualne zobrazovaneho mesice, rok a tlacitko pro zobrazeni aktualniho mesice.
+    - Pod kalendarem je stale zobrazena sekce 'detail dne', ktera je pri otevreni ankety prazdna, ale po kliknuti na nektery den se na ni ukazou detaily ohledne hlasu ve vybranem dni. Zobrazuje se to jako necislovany seznam, kde vlevo je barevny krouzek a vpravo nickname osoby, ktera pro tento den hlasovala. tento seznam je scrollovaci. Nad nim jsou tri tlacitka - ANO, MOZNA, NE. Tato tlacitka umoznuji uzivateli hlasovat.
+    - Hlas uzivatele muze byt trojiho typu: ANO, NE a MOZNA. Hlasy typu NE nejsou nijak zobrazovane a ukladane v databazi. Hlas MOZNA je symbolizovan v detailu dne plnym barevnym krouzkem, hlas MOZNA pak nevyplnenym krouzkem. Kazde pole kalendare, v jehoz dni jsou ulozeny nejake hlasy, ukazuje jejich pocet. Nulovy pocet zobrazen neni.
+    - V zahlavi stranky vpravo je tlacitko pro sdileni anktety, ktere zkopiruje URL do schranky (a vyskoci okno informujici o zkopirovani) a tlacitko pro zobrazeni uzivatelu (sidebar se seznamem uzivatelu a jejich barvou)
+    - V zahlavi vlevo je pak tlacitko, ktere otevre bocni panel zleva. Tento panel obsahuje seznam anket vytvorenych aktualnim uzivatelem. Dole v panelu je tlacitko plus, ktere odkazuje na route '/'
+
+Ukladane informace webem:
+- po otevreni aplikace je v localstorage vytvoreno ID uzivatele. Toto se pak predava do backendu pri volani API.
+
+Schema databaze:
+- tabulka USERS:
+    - uklada existujici ID uzivatelu. Zaznam vznikne pri volani API, kdyz toto ID jeste v tabulce uzivatelu neni.
+
+- tabulka poll_participants
+    - uklada ctverici poll_id, user_id, user_color a nickname. Slouzi pro ulozeni predzdivek uzivatelu a jejich barvy v ruznych anketach.
+
+- tabulka polls
+    - uklada informace o jednotlivych anketach:
+        - poll_id, kterym je anketa identifikovana v URL
+        - creating_user - ID uzivatele, ktery anketu vytvoril
+        - create_date - datum a cas vytvoreni ankety
+    
+- tabulka votes
+    - uklada hlasy vsech anket zaroven
+        - vote_id - id hlasu
+        - poll_id - do ktere ankety tento hlas patri
+        - voted_date - datum, o kterem tento hlas mluvi
+        - user_id - komu hlas patri
+        - vote_type - muze byt YES nebo MAYBE. Pokud dojde ke zmene vote type na NO, zaznam se vymaze
+
+Technologie:
+- FE: html/js/css
+- BE: PHP, MySQL

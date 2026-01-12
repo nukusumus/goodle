@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Polls</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="index-container">
+        <h1>My Polls</h1>
+        <ul class="polls-list" id="polls-list">
+            <!-- Polls will be loaded here -->
+        </ul>
+        <button class="plus-btn" id="plus-btn">+</button>
+    </div>
+    <script src="main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            loadUserPolls();
+            
+            document.getElementById('plus-btn').addEventListener('click', () => {
+                const poll_name = prompt('Enter poll name:');
+                if (!poll_name || !poll_name.trim()) {
+                    return;
+                }
+                const user_id = getUserId();
+                fetch('backend/api/create_poll.php', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({poll_name: poll_name.trim(), user_id})
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.href = 'poll.html?id=' + data.poll_id;
+                    } else {
+                        alert(data.error);
+                    }
+                })
+                .catch(err => alert('Error: ' + err.message));
+            });
+        });
+
+        function loadUserPolls() {
+            fetch('backend/api/get_user_polls.php?user_id=' + getUserId())
+                .then(res => res.json())
+                .then(userPolls => {
+                    const pollsUl = document.getElementById('polls-list');
+                    pollsUl.innerHTML = '';
+                    
+                    if (userPolls.length === 0) {
+                        const li = document.createElement('li');
+                        li.textContent = 'No polls yet. Click + to create your first poll!';
+                        li.style.textAlign = 'center';
+                        li.style.color = '#666';
+                        pollsUl.appendChild(li);
+                        return;
+                    }
+                    
+                    userPolls.forEach(p => {
+                        const li = document.createElement('li');
+                        const nameSpan = document.createElement('span');
+                        nameSpan.textContent = (p.name || p.poll_id).substring(0, 30);
+                        nameSpan.onclick = () => window.location.href = 'poll.html?id=' + p.poll_id;
+                        nameSpan.style.cursor = 'pointer';
+                        
+                        const deleteBtn = document.createElement('button');
+                        deleteBtn.className = 'delete-btn';
+                        deleteBtn.innerHTML = '🗑️';
+                        deleteBtn.onclick = (e) => {
+                            e.stopPropagation();
+                            if (confirm('Delete this poll?')) {
+                                fetch('backend/api/delete_poll.php', {
+                                    method: 'POST',
+                                    headers: {'Content-Type': 'application/json'},
+                                    body: JSON.stringify({poll_id: p.poll_id, user_id: getUserId()})
+                                }).then(r => r.json()).then(data => {
+                                    if (data.success) {
+                                        li.remove();
+                                    } else alert(data.error);
+                                });
+                            }
+                        };
+                        
+                        li.appendChild(nameSpan);
+                        li.appendChild(deleteBtn);
+                        pollsUl.appendChild(li);
+                    });
+                });
+        }
+    </script>
+</body>
+
+</html>

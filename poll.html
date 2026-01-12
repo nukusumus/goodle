@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Poll</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+
+        .polls-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .polls-list li {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .polls-list li:last-child {
+            border-bottom: none;
+        }
+
+        .polls-list span {
+            cursor: pointer;
+            color: #333;
+            text-decoration: none;
+        }
+
+        .polls-list span:hover {
+            color: #007bff;
+        }
+
+        .plus-btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 24px;
+            cursor: pointer;
+            display: block;
+            margin: 20px auto;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .plus-btn:hover {
+            background-color: #0056b3;
+        }
+
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #ff4444;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .delete-btn:hover {
+            color: #cc0000;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+
+        <button class="btns" id="home-btn" title="Home">
+            <svg viewBox="0 0 24 24">
+                <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+            </svg>
+        </button>
+
+        <button class="btns" id="share-btn" title="Share">
+            <svg viewBox="0 0 24 24">
+                <path
+                    d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z" />
+            </svg>
+        </button>
+
+        <button class="btns" id="users-btn" title="Users">
+            <svg viewBox="0 0 24 24">
+                <path
+                    d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+            </svg>
+        </button>
+    </div>
+    <div style="display:flex; flex-direction: column;align-items: center;">
+        <h1 id="pollTitle">Poll Name</h1>
+        <div class="nickname-section">
+            <input type="text" id="nickname-input" placeholder="nickname">
+            <button id="nickname-ok">OK</button>
+        </div>
+    </div>
+
+
+    <div class="calendar" id="calendar">
+        <!-- Calendar will be rendered here -->
+    </div>
+    <div id="day-details" class="day-details">
+        <div class="buttons">
+            <button id="yes-btn">YES</button>
+            <button id="maybe-btn">MAYBE</button>
+            <button id="no-btn">NO</button>
+        </div>
+        <ul class="vote-list">
+        </ul>
+    </div>
+    <div class="sidebar right-sidebar" id="users-sidebar">
+        <h3>Poll Voters</h3>
+        <ul>
+            <!-- Users will be loaded here -->
+        </ul>
+    </div>
+    <script src="main.js"></script>
+    <script>
+        // const API_BASE = 'backend/api/';
+
+        let selectedDate = null;
+        let selectedDay = null;
+        let votes = [];
+        let participants = [];
+        let poll_id;
+        let currentYear, currentMonth;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            poll_id = urlParams.get('id');
+
+            if (!poll_id) {
+                // If no poll ID, redirect to index.html
+                window.location.href = 'index.html';
+                return;
+            }
+
+            try {
+                const response = await fetch('backend/api/get_poll.php?poll_id=' + poll_id);
+                const data = await response.json();
+                if (data.error) {
+                    // If poll not found, redirect to index.html
+                    window.location.href = 'index.html';
+                    return;
+                }
+                const poll = data.poll;
+                participants = data.participants;
+                votes = data.votes;
+
+                // Set poll title
+                document.getElementById('pollTitle').textContent = poll.name;
+
+                // Populate users sidebar
+                const usersUl = document.querySelector('#users-sidebar ul');
+                usersUl.innerHTML = '';
+                const isCreator = poll.creating_user === getUserId();
+                participants.forEach(participant => {
+                    const li = document.createElement('li');
+                    const circle = document.createElement('span');
+                    circle.className = 'circle';
+                    circle.style.color = participant.user_color;
+                    circle.textContent = '●';
+                    const nameSpan = document.createElement('span');
+                    nameSpan.textContent = participant.nickname;
+                    li.appendChild(circle);
+                    li.appendChild(nameSpan);
+                    if (isCreator && participant.user_id !== getUserId()) {
+                        const removeBtn = document.createElement('button');
+                        removeBtn.textContent = '❌';
+                        removeBtn.onclick = () => {
+                            if (confirm('Remove this user from the poll?')) {
+                                fetch('backend/api/remove_user.php', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ poll_id, user_id: participant.user_id })
+                                }).then(r => r.json()).then(data => {
+                                    if (data.success) {
+                                        window.location.reload();
+                                    } else alert(data.error);
+                                });
+                            }
+                        };
+                        li.appendChild(removeBtn);
+                    }
+                    usersUl.appendChild(li);
+                });
+
+                // Set nickname input
+                const currentParticipant = participants.find(p => p.user_id === getUserId());
+                if (currentParticipant) document.getElementById('nickname-input').value = currentParticipant.nickname;
+
+                // Determine default month
+                if (votes.length > 0) {
+                    const dates = votes.map(v => new Date(v.voted_date));
+                    const minDate = new Date(Math.min(...dates));
+                    currentYear = minDate.getFullYear();
+                    currentMonth = minDate.getMonth();
+                } else {
+                    const now = new Date();
+                    currentYear = now.getFullYear();
+                    currentMonth = now.getMonth();
+                }
+
+                // Render calendar
+                renderCalendar();
+
+                // Initially disable vote buttons
+                document.getElementById('yes-btn').disabled = true;
+                document.getElementById('maybe-btn').disabled = true;
+                document.getElementById('no-btn').disabled = true;
+
+                // Add event listeners
+                document.getElementById('nickname-ok').addEventListener('click', () => {
+                    const nickname = document.getElementById('nickname-input').value.trim();
+                    if (!nickname) return;
+                    const currentParticipant = participants.find(p => p.user_id === getUserId());
+                    if (currentParticipant && currentParticipant.nickname === nickname) return; // no change
+                    // No confirmation, just update
+                    fetch('backend/api/update_nickname.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ poll_id, user_id: getUserId(), nickname })
+                    }).then(r => r.json()).then(data => {
+                        if (data.success) {
+                            alert('Nickname updated successfully.');
+                            // Update or add the participant
+                            const existingIndex = participants.findIndex(p => p.user_id === getUserId());
+                            if (existingIndex > -1) {
+                                participants[existingIndex] = data.participant;
+                            } else {
+                                participants.push(data.participant);
+                            }
+                            // update sidebar
+                            const usersUl = document.querySelector('#users-sidebar ul');
+                            usersUl.innerHTML = '';
+                            participants.forEach(participant => {
+                                const li = document.createElement('li');
+                                li.innerHTML = `<span class="circle" style="color: ${participant.user_color};">●</span> ${participant.nickname}`;
+                                usersUl.appendChild(li);
+                            });
+                            // update vote list if open
+                            if (selectedDate) selectDay(selectedDate.getDate());
+                        } else alert(data.error);
+                    });
+                });
+                document.getElementById('yes-btn').addEventListener('click', () => vote('YES'));
+                document.getElementById('maybe-btn').addEventListener('click', () => vote('MAYBE'));
+                document.getElementById('no-btn').addEventListener('click', () => vote('NO'));
+
+            } catch (error) {
+                // If any error occurs, redirect to index.html
+                window.location.href = 'index.html';
+            }
+
+            // Add sidebar event listeners
+            document.getElementById('users-btn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggleSidebar('users-sidebar');
+            });
+
+            // Close users sidebar when clicking outside
+            document.addEventListener('click', (e) => {
+                const usersSidebar = document.getElementById('users-sidebar');
+                if (!usersSidebar.contains(e.target) && !document.getElementById('users-btn').contains(e.target)) {
+                    usersSidebar.style.display = 'none';
+                }
+            });
+
+            // Home button event listener
+            document.getElementById('home-btn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                window.location.href = 'index.html';
+            });
+
+            // Share button event listener
+            document.getElementById('share-btn').addEventListener('click', async () => {
+                try {
+                    await navigator.clipboard.writeText(window.location.href);
+                    alert('URL copied to clipboard!');
+                } catch (err) {
+                    alert('Failed to copy URL: ' + err.message);
+                }
+            });
+        });
+
+        function toggleSidebar(id) {
+            const sidebar = document.getElementById(id);
+            sidebar.style.display = sidebar.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function renderCalendar() {
+            const calendar = document.getElementById('calendar');
+            calendar.innerHTML = '';
+
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+            const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+            // Header
+            const header = document.createElement('div');
+            header.className = 'calendar-header';
+            header.innerHTML = `<button onclick="changeMonth(-1)"><</button> ${monthNames[currentMonth]} ${currentYear} <button onclick="changeMonth(1)">></button> <button onclick="goToCurrent()">Current</button>`;
+            calendar.appendChild(header);
+
+            // Table
+            const table = document.createElement('table');
+            const thead = document.createElement('thead');
+            const trHead = document.createElement('tr');
+            weekdays.forEach(day => {
+                const th = document.createElement('th');
+                th.textContent = day;
+                trHead.appendChild(th);
+            });
+            thead.appendChild(trHead);
+            table.appendChild(thead);
+
+            const tbody = document.createElement('tbody');
+            const firstDay = new Date(currentYear, currentMonth, 1);
+            const lastDay = new Date(currentYear, currentMonth + 1, 0);
+            const startDate = new Date(firstDay);
+            const day = firstDay.getDay();
+            const diff = day === 0 ? 6 : day - 1; // Monday start
+            startDate.setDate(startDate.getDate() - diff);
+
+            for (let week = 0; week < 6; week++) {
+                const tr = document.createElement('tr');
+                for (let day = 0; day < 7; day++) {
+                    const td = document.createElement('td');
+                    const date = new Date(startDate);
+                    date.setDate(startDate.getDate() + week * 7 + day);
+                    const dayNum = date.getDate();
+                    if (date.getMonth() === currentMonth) {
+                        td.textContent = dayNum;
+                        if (dayNum === selectedDay) {
+                            td.classList.add('selected');
+                        }
+                        if (date.getDay() === 6 || date.getDay() === 0) {
+                            td.classList.add('weekend');
+                        }
+                        // Check votes
+                        const dateStr = date.toISOString().split('T')[0];
+                        const dayVotes = votes.filter(v => v.voted_date === dateStr);
+                        const yesCount = dayVotes.filter(v => v.vote_type === 'YES').length;
+                        const maybeCount = dayVotes.filter(v => v.vote_type === 'MAYBE').length;
+                        let voteText = '';
+                        if (yesCount > 0) voteText += yesCount;
+                        if (maybeCount > 0) {
+                            if (voteText) voteText += ' + ';
+                            voteText += maybeCount + '?';
+                        }
+                        if (voteText) {
+                            const voteSpan = document.createElement('span');
+                            voteSpan.className = 'vote-count';
+                            voteSpan.textContent = voteText;
+                            td.appendChild(voteSpan);
+                        }
+                        td.onclick = () => selectDay(dayNum);
+                    } else {
+                        td.classList.add('other-month');
+                        td.textContent = dayNum;
+                    }
+                    tr.appendChild(td);
+                }
+                tbody.appendChild(tr);
+            }
+            table.appendChild(tbody);
+            calendar.appendChild(table);
+        }
+
+        function vote(type) {
+            if (!selectedDate) return;
+            const user_id = getUserId();
+            const currentParticipant = participants.find(p => p.user_id === user_id);
+            if (!currentParticipant || !currentParticipant.nickname.trim()) {
+                alert('Please set your nickname first.');
+                return;
+            }
+            fetch('backend/api/vote.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    poll_id: poll_id,
+                    user_id: user_id,
+                    date: selectedDate.toISOString().split('T')[0],
+                    vote_type: type
+                })
+            }).then(res => res.json()).then(data => {
+                if (data.success) {
+                    // re-fetch poll data
+                    fetch('backend/api/get_poll.php?poll_id=' + poll_id)
+                        .then(res => res.json())
+                        .then(newData => {
+                            votes = newData.votes;
+                            renderCalendar();
+                            selectDay(selectedDate.getDate());
+                        });
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            }).catch(err => alert('Network error'));
+        }
+
+        function changeMonth(delta) {
+            currentMonth += delta;
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            }
+            if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            }
+            selectedDay = null;
+            selectedDate = null;
+            // Disable vote buttons
+            document.getElementById('yes-btn').disabled = true;
+            document.getElementById('maybe-btn').disabled = true;
+            document.getElementById('no-btn').disabled = true;
+            renderCalendar();
+        }
+
+        function goToCurrent() {
+            const now = new Date();
+            currentYear = now.getFullYear();
+            currentMonth = now.getMonth();
+            renderCalendar();
+        }
+
+        function selectDay(day) {
+            selectedDate = new Date(currentYear, currentMonth, day);
+            selectedDay = day;
+
+            // Enable vote buttons
+            document.getElementById('yes-btn').disabled = false;
+            document.getElementById('maybe-btn').disabled = false;
+            document.getElementById('no-btn').disabled = false;
+
+            const dayDetails = document.getElementById('day-details');
+
+            // Highlight voted button
+            const buttons = document.querySelectorAll('.buttons button');
+            buttons.forEach(btn => btn.classList.remove('highlighted'));
+            const dayStr = selectedDate.toISOString().split('T')[0];
+            const dayVotes = votes.filter(v => v.voted_date === dayStr);
+            const userVote = dayVotes.find(v => v.user_id === getUserId());
+            if (userVote) {
+                if (userVote.vote_type === 'YES') document.getElementById('yes-btn').classList.add('highlighted');
+                else if (userVote.vote_type === 'MAYBE') document.getElementById('maybe-btn').classList.add('highlighted');
+            } else {
+                document.getElementById('no-btn').classList.add('highlighted');
+            }
+
+            renderCalendar(); // to update highlight
+
+            const voteList = dayDetails.querySelector('ul');
+
+            voteList.innerHTML = '';
+
+            for (const v of dayVotes) {
+
+                const participant = participants.find(p => p.user_id === v.user_id);
+
+                if (!participant) continue;
+
+                const li = document.createElement('li');
+
+                const circle = document.createElement('span');
+
+                circle.className = 'circle';
+
+                circle.style.color = participant.user_color;
+
+                circle.textContent = '●';
+
+                li.appendChild(circle);
+
+                const nameText = document.createTextNode(' ' + participant.nickname);
+
+                li.appendChild(nameText);
+
+                if (v.vote_type === 'MAYBE') {
+
+                    li.style.fontStyle = 'italic';
+
+                }
+
+                voteList.appendChild(li);
+
+            }
+
+        }
+    </script>
+</body>
+
+</html>

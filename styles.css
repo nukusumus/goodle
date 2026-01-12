@@ -1,0 +1,342 @@
+/* Common styles for index.html */
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f5f5f5;
+}
+
+/* Index.html specific styles */
+.index-container {
+    max-width: 800px;
+    margin: 0 auto;
+    background-color:white;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+.index-container h1 {
+    color: #333;
+    text-align: center;
+}
+
+.polls-list {
+    list-style: none;
+    padding: 0;
+}
+
+.polls-list li {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.polls-list li:last-child {
+    border-bottom: none;
+}
+
+.polls-list span {
+    cursor: pointer;
+    color: #333;
+    text-decoration: none;
+}
+
+.polls-list span:hover {
+    color: #007bff;
+}
+
+.plus-btn {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 24px;
+    cursor: pointer;
+    display: block;
+    margin: 20px auto;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.plus-btn:hover {
+    background-color: #0056b3;
+}
+
+.delete-btn {
+    background: none;
+    border: none;
+    color: #ff4444;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.delete-btn:hover {
+    color: #cc0000;
+}
+
+/* Poll page styles */
+
+body {
+    padding-bottom: 120px; /* Space for fixed day-details */
+}
+
+.container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+
+input {
+    padding: 10px;
+    font-size: 16px;
+    width: 100%;
+    max-width: 300px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+/* Poll page styles */
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: #eee;
+    border-bottom: 1px solid #ccc;
+}
+
+.btns {
+    padding: 8px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.btns:hover {
+    background-color: #ddd;
+}
+
+.right-btns {
+    display: flex;
+    gap: 5px;
+}
+
+.header h1 {
+    text-align: center;
+    flex: 1;
+}
+.header svg {
+    width: 20px;
+    height: 20px;
+    fill: #333;
+}
+
+.calendar {
+    flex: 1;
+    background-color: #f9f9f9;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+}
+
+.calendar-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.calendar table {
+    border-collapse: collapse;
+    width: 100%;
+    max-width: 400px;
+}
+
+.calendar th, .calendar td {
+    border: 1px solid #ccc;
+    padding: 5px;
+    text-align: left;
+    vertical-align: top;
+    width: 14.28%; /* 100% / 7 */
+    height: 40px;
+    box-sizing: border-box;
+    position: relative;
+}
+.calendar td .vote-count {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    font-size: 12px;
+    color: #666;
+}
+
+.calendar th {
+    background-color: #eee;
+}
+
+.calendar td {
+    cursor: pointer;
+}
+
+.calendar td.other-month {
+    color: #aaa;
+}
+
+.calendar td:hover {
+    background-color: #e0e0e0;
+}
+
+.calendar .selected {
+    background-color: #add8e6;
+    font-weight: bold;
+}
+.calendar .weekend {
+    color: red;
+}
+
+.day-details {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 10px;
+    background-color: white;
+    border-top: 1px solid #ccc;
+    box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+}
+
+.nickname-section {
+    display:flex;
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.nickname-section input {
+    padding: 5px;
+    margin-right: 5px;
+}
+
+.buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    justify-content: center;
+}
+
+.buttons button.highlighted {
+    background-color: #28a745;
+}
+
+.buttons button:disabled {
+    background-color: #ccc;
+    color: #666;
+    cursor: not-allowed;
+}
+
+.vote-list {
+    list-style: none;
+    padding: 0;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.vote-list li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 5px 0;
+}
+
+.circle {
+    font-size: 20px;
+}
+
+.sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    width: 250px;
+    background-color: #ddd;
+    padding: 10px;
+    box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+    display: none;
+    overflow-y: auto;
+}
+
+.left-sidebar {
+    left: 0;
+}
+
+.right-sidebar {
+    right: 0;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+}
+
+.sidebar li {
+    padding: 5px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.sidebar li button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.sidebar h3 {
+    margin: 0 0 10px 0;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.sidebar button {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+}
+
+@media (max-width: 600px) {
+    .calendar {
+        font-size: 18px;
+    }
+    .sidebar {
+        width: 200px;
+    }
+}
+
